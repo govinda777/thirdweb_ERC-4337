@@ -13,7 +13,7 @@ Neste tutorial, você aprenderá a implementar carteiras inteligentes ERC-4337 u
 1. **Implementação simples** usando o componente UI "Connect Wallet" (para rápida implementação)
 2. **Implementação personalizada** usando o SDK da Thirdweb (para maior controle)
 
-> **NOTA IMPORTANTE**: Este tutorial usava originalmente a rede de teste **Mumbai**, que foi descontinuada em 08/04/2024. Recomendamos usar a rede de teste **Sepolia** em seu lugar. Todas as referências a Mumbai neste tutorial devem ser substituídas por Sepolia.
+> **NOTA IMPORTANTE**: Este tutorial foi desenvolvido com a rede de teste **Sepolia**.
 
 ### O que são Carteiras Inteligentes ERC-4337?
 
@@ -40,12 +40,84 @@ Estes recursos resolvem muitos dos problemas que dificultam a adoção em massa 
 Nesta primeira parte, implementaremos carteiras inteligentes de forma rápida e direta usando o componente "Connect Wallet" da Thirdweb.
 
 ### Visão Geral desta Seção:
+
+```mermaid
+graph TD
+    A[Implantação do contrato Account Factory<br>ID: thirdweb.factory.account] --> B[Configuração da chave de API<br>ID: thirdweb.api.clientID]
+    B --> C[Criação do projeto React<br>ID: thirdweb.template.evm]
+    C --> D[Configuração do ThirdwebProvider<br>ID: thirdweb.sdk.react]
+    D --> E[Implementação do componente Connect Wallet<br>ID: thirdweb.ui.connectWallet]
+    E --> F[Teste da implementação<br>ID: thirdweb.wallet.smart]
+```
+
 1. Implantação do contrato Account Factory (no dashboard Thirdweb)
 2. Configuração da chave de API (no dashboard Thirdweb)
 3. Criação do projeto React (via CLI)
 4. Configuração do ThirdwebProvider com smart wallets
 5. Implementação do componente Connect Wallet
 6. Teste da implementação
+
+### Class Diagram
+
+```mermaid
+classDiagram
+    class AccountFactory {
+        <<thirdweb.contracts.AccountFactory>>
+        +deployAccount()
+        +factoryAddress: string
+    }
+    class SmartWallet {
+        <<thirdweb.wallet.smart>>
+        +transfer()
+        +approve()
+        +approveNFT()
+        +approveToken()
+        +approveAll()
+        +walletAddress: string
+    }
+    class Paymaster {
+        <<thirdweb.paymaster>>
+        +payGas()
+        +clientId: string
+    }
+    class EOA {
+        <<thirdweb.wallet.personal>>
+        +sign()
+        +personalWalletAddress: string
+    }
+    class NFT {
+        <<thirdweb.contract.erc721/erc1155>>
+        +mint()
+        +transfer()
+        +approve()
+        +approveAll()
+        +contractAddress: string
+    }
+    class Token {
+        <<thirdweb.contract.erc20>>
+        +transfer()
+        +approve()
+        +approveAll()
+        +tokenAddress: string
+    }
+    AccountFactory --> SmartWallet
+    SmartWallet --> Paymaster
+    SmartWallet --> EOA
+    SmartWallet --> NFT
+    SmartWallet --> Token
+    Paymaster --> Token
+    Paymaster --> NFT
+    EOA --> Token
+    EOA --> NFT
+    AccountFactory --> Paymaster
+    AccountFactory --> EOA
+    AccountFactory --> NFT
+    AccountFactory --> Token
+    AccountFactory --> Paymaster
+    AccountFactory --> SmartWallet
+```
+
+O diagrama acima mostra as relações entre os contratos e as classes da Thirdweb, incluindo os identificadores específicos de cada componente.
 
 ### Passo 1: Implantação do Contrato de Fábrica de Contas (Account Factory)
 
@@ -54,7 +126,7 @@ Antes de começarmos a codificar, precisamos implantar o contrato que criará no
 1. Acesse o **[dashboard da Thirdweb](https://thirdweb.com/dashboard)**.
 2. **Conecte sua carteira** ao dashboard.
 3. Navegue até a seção de **"Contracts"** e clique em **"Deploy new contract"**.
-4. Na seção de populares (ou procurando por "smart wallets"), localize e selecione o contrato **"Account Factory"**.
+4. Na seção de populares (ou procurando por "smart wallets"), localize e selecione o contrato **"Account Factory"** (ID: `thirdweb.contracts.AccountFactory`).
    > **Por quê?** Este contrato é essencial pois funciona como uma "fábrica" que cria carteiras inteligentes para seus usuários.
 5. Selecione a rede onde você deseja implantar o contrato. Para este tutorial, use a rede **Sepolia**. Clique em **"Deploy Now"**.
 6. Confirme as transações necessárias em sua carteira.
@@ -82,7 +154,7 @@ Para utilizar os recursos da Thirdweb, incluindo transações sem gás, precisam
    - Para produção: seu domínio real
 
 6. Clique em **"Create"** e salve com segurança:
-   - **Client ID**: Você vai usar em seu código
+   - **Client ID** (ID: `thirdweb.api.clientID`): Você vai usar em seu código
    - **Secret Key**: Guarde em um local seguro (mostrada apenas uma vez)
 
 > **Nota sobre produção**: Para usar smart wallets na rede principal (Mainnet) e habilitar transações sem gás, você precisará adicionar um método de pagamento na seção "Account and Billing".
@@ -97,7 +169,7 @@ Agora que temos nossa infraestrutura blockchain pronta, vamos criar o projeto fr
    npx thirdweb create app --evm --framework next --typescript smart-wallet-simple
    ```
 
-   > **O que isto faz?** Este comando cria um novo projeto Next.js com TypeScript e configurações iniciais para trabalhar com a Thirdweb.
+   > **O que isto faz?** Este comando cria um novo projeto Next.js com TypeScript e configurações iniciais para trabalhar com a Thirdweb (ID: `thirdweb.template.evm`).
 
 2. Navegue até o diretório do projeto:
 
@@ -113,7 +185,7 @@ Este é um passo crítico onde configuramos nosso aplicativo para usar carteiras
 
 1. Abra o arquivo **`_app.tsx`** na pasta `pages`.
 
-2. Modifique a configuração do `ThirdwebProvider` para incluir:
+2. Modifique a configuração do `ThirdwebProvider` (ID: `thirdweb.sdk.react`) para incluir:
    - Rede correta (Sepolia em vez de Mumbai)
    - Client ID da sua chave de API
    - Configuração das smart wallets
@@ -191,7 +263,7 @@ A beleza desta abordagem está na simplicidade - precisamos apenas adicionar o c
    }
    ```
 
-   > **O que faz esse componente?** O `ConnectWallet` é um componente completo de UI que gerencia todo o fluxo de conexão de carteira, incluindo a criação e gerenciamento de smart wallets.
+   > **O que faz esse componente?** O `ConnectWallet` (ID: `thirdweb.ui.connectWallet`) é um componente completo de UI que gerencia todo o fluxo de conexão de carteira, incluindo a criação e gerenciamento de smart wallets.
 
 ### Passo 6: Teste da Implementação Simples
 
@@ -212,13 +284,13 @@ Vamos testar nossa implementação para ver as carteiras inteligentes em ação.
 4. Teste o fluxo completo:
    - Insira seu email e clique em "Continue"
    - Verifique seu email e insira o código OTP recebido
-   - Uma carteira Paper será criada como EOA
-   - Uma smart wallet será criada usando esta carteira Paper como proprietário
+   - Uma carteira Paper será criada como EOA (ID: `thirdweb.wallet.personal`)
+   - Uma smart wallet será criada usando esta carteira Paper como proprietária (ID: `thirdweb.wallet.smart`)
    - O endereço da smart wallet será o conectado ao aplicativo
 
 5. Para testar transações sem gás:
    - Adicione um botão em `index.tsx` que interage com um contrato permitido
-   - Ao clicar, a transação ocorrerá sem custo para o usuário
+   - Ao clicar, a transação ocorrerá sem custo para o usuário através do paymaster (ID: `thirdweb.paymaster`)
    - Verifique o resultado em um explorador blockchain
 
 > **Conexão conceitual**: Observe como o smart wallet usa a carteira Paper (EOA) como proprietário, mas o usuário interage diretamente com o smart wallet. Isso cria uma abstração que simplifica a experiência.
@@ -277,7 +349,7 @@ Primeiro, configuramos o ThirdwebProvider básico. Posteriormente, usaremos uma 
    export default MyApp;
    ```
 
-   > **Por que é diferente da Parte 1?** Aqui não configuramos as smart wallets no ThirdwebProvider principal porque vamos criar uma implementação personalizada usando o SDK.
+   > **Por que é diferente da Parte 1?** Aqui não configuramos as smart wallets no ThirdwebProvider principal porque vamos criar uma implementação personalizada usando o SDK (ID: `thirdweb.sdk.typescript`).
 
 ### Passo 9: Criação do Arquivo de Configuração de Endereços
 
@@ -288,9 +360,9 @@ Para manter o código organizado, centralizaremos os endereços dos contratos em
 
    ```typescript
    // Substitua com seus endereços reais implantados na rede Sepolia
-   export const ACCOUNT_FACTORY_ADDRESS = 'SEU_ENDEREÇO_DA_FACTORY';
-   export const MONSTER_CONTRACT_ADDRESS = 'SEU_ENDEREÇO_DO_CONTRATO_NFT';
-   export const TOKEN_CONTRACT_ADDRESS = 'SEU_ENDEREÇO_DO_CONTRATO_TOKEN';
+   export const ACCOUNT_FACTORY_ADDRESS = 'SEU_ENDEREÇO_DA_FACTORY'; // ID: thirdweb.contracts.AccountFactory
+   export const MONSTER_CONTRACT_ADDRESS = 'SEU_ENDEREÇO_DO_CONTRATO_NFT'; // ID: thirdweb.contracts.erc1155
+   export const TOKEN_CONTRACT_ADDRESS = 'SEU_ENDEREÇO_DO_CONTRATO_TOKEN'; // ID: thirdweb.contracts.erc20
    ```
 
    > **Conexão com passos anteriores**: O `ACCOUNT_FACTORY_ADDRESS` é o mesmo endereço do contrato que implantamos no Passo 1 da Parte 1. Os outros endereços são de contratos que você deve implantar na mesma rede (Sepolia).
@@ -369,7 +441,7 @@ Agora, vamos criar um componente de login personalizado que usará uma senha par
    };
    ```
 
-   > **O que este componente faz?** Ele cria uma interface para o usuário inserir uma senha, que será usada para criar ou acessar uma carteira local (LocalWallet). Esta carteira local funcionará como a EOA (proprietária) por trás da smart wallet.
+   > **O que este componente faz?** Ele cria uma interface para o usuário inserir uma senha, que será usada para criar ou acessar uma carteira local (LocalWallet, ID: `thirdweb.wallet.local`). Esta carteira local funcionará como a EOA (proprietária) por trás da smart wallet.
 
 ### Passo 11: Criação das Funções de Carteira
 
@@ -380,7 +452,7 @@ Esta é a parte mais técnica do tutorial. Aqui, implementaremos a lógica para 
 2. Crie um arquivo **`wallet.ts`** dentro desta pasta:
 
    ```typescript
-   import { ThirdwebSDK } from '@thirdweb-dev/sdk';
+   import { ThirdwebSDK } from '@thirdweb-dev/sdk'; // ID: thirdweb.sdk.typescript
    import { Sepolia } from '@thirdweb-dev/chains';
    import { SmartWallet, LocalWallet } from '@thirdweb-dev/wallets';
    import { ACCOUNT_FACTORY_ADDRESS, MONSTER_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS } from '../const/addresses';
@@ -389,9 +461,9 @@ Esta é a parte mais técnica do tutorial. Aqui, implementaremos a lógica para 
    export const createSmartWallet = (clientId: string) => {
      return new SmartWallet({
        chain: Sepolia,
-       factoryAddress: ACCOUNT_FACTORY_ADDRESS,
+       factoryAddress: ACCOUNT_FACTORY_ADDRESS, // ID: thirdweb.contracts.AccountFactory
        gasless: true,
-       clientId,
+       clientId, // ID: thirdweb.api.clientID
      });
    };
 
@@ -404,8 +476,8 @@ Esta é a parte mais técnica do tutorial. Aqui, implementaremos a lógica para 
      setLoadingStatus('Procurando conta de treinador...');
 
      // 1. Criar instâncias de smart wallet e carteira local
-     const smartWallet = createSmartWallet(clientId);
-     const personalWallet = new LocalWallet();
+     const smartWallet = createSmartWallet(clientId); // ID: thirdweb.wallet.smart
+     const personalWallet = new LocalWallet(); // ID: thirdweb.wallet.local
 
      // 2. Carregar ou criar carteira local usando a senha
      await personalWallet.loadOrCreate({
@@ -430,8 +502,8 @@ Esta é a parte mais técnica do tutorial. Aqui, implementaremos a lógica para 
        setLoadingStatus('Nova conta detectada. Criando conta...');
        
        // Obter referências aos contratos
-       const monsterContract = await sdk.getContract(MONSTER_CONTRACT_ADDRESS);
-       const tokenContract = await sdk.getContract(TOKEN_CONTRACT_ADDRESS);
+       const monsterContract = await sdk.getContract(MONSTER_CONTRACT_ADDRESS); // ID: thirdweb.contracts.erc1155
+       const tokenContract = await sdk.getContract(TOKEN_CONTRACT_ADDRESS); // ID: thirdweb.contracts.erc20
 
        // Preparar transações
        const claimNftTransaction = await monsterContract.erc1155.claim(0, 1);
@@ -457,12 +529,12 @@ Esta é a parte mais técnica do tutorial. Aqui, implementaremos a lógica para 
    ```
 
    > **Análise do código**: Este código faz várias coisas importantes:
-   > 1. Cria uma carteira local protegida por senha
-   > 2. Cria um smart wallet que usa a carteira local como proprietária
+   > 1. Cria uma carteira local protegida por senha (ID: `thirdweb.wallet.local`)
+   > 2. Cria um smart wallet que usa a carteira local como proprietária (ID: `thirdweb.wallet.smart`)
    > 3. Verifica se o smart wallet já foi implantado antes
    > 4. Para novos usuários, envia automaticamente ativos iniciais (NFT e tokens)
    > 5. Utiliza transações em lote para realizar múltiplas operações em uma única transação
-   > 6. Implementa transações sem gás para melhor UX
+   > 6. Implementa transações sem gás para melhor UX (ID: `thirdweb.paymaster`)
 
 ### Passo 12: Criação do Componente Connected
 
@@ -471,7 +543,7 @@ Este componente gerenciará a experiência do usuário após o login.
 1. Crie um arquivo **`connected.tsx`** na pasta `components`:
 
    ```typescript jsx
-   import { ThirdwebProvider } from '@thirdweb-dev/react';
+   import { ThirdwebProvider } from '@thirdweb-dev/react'; // ID: thirdweb.sdk.react
    import { Sepolia } from '@thirdweb-dev/chains';
    import { UserProfile } from './profile';
    import { NavBar } from './NavBar';
@@ -528,7 +600,7 @@ Este componente exibirá os ativos do usuário e permitirá interações com os 
      useOwnedNFTs,
      useTokenBalance,
      Web3Button
-   } from '@thirdweb-dev/react';
+   } from '@thirdweb-dev/react'; // ID: thirdweb.sdk.react
    import { 
      MONSTER_CONTRACT_ADDRESS, 
      TOKEN_CONTRACT_ADDRESS 
@@ -539,8 +611,8 @@ Este componente exibirá os ativos do usuário e permitirá interações com os 
      const [showStore, setShowStore] = useState(false);
      
      // Obter contratos
-     const { contract: monsterContract } = useContract(MONSTER_CONTRACT_ADDRESS, "edition");
-     const { contract: tokenContract } = useContract(TOKEN_CONTRACT_ADDRESS, "token");
+     const { contract: monsterContract } = useContract(MONSTER_CONTRACT_ADDRESS, "edition"); // ID: thirdweb.contracts.erc1155
+     const { contract: tokenContract } = useContract(TOKEN_CONTRACT_ADDRESS, "token"); // ID: thirdweb.contracts.erc20
      
      // Buscar NFTs do usuário
      const { data: ownedNFTs, isLoading: loadingNFTs } = useOwnedNFTs(monsterContract, address);
@@ -580,7 +652,7 @@ Este componente exibirá os ativos do usuário e permitirá interações com os 
                <div className="store-item">
                  <h4>Monstro Raro</h4>
                  <p>Custo: 5 tokens</p>
-                 <Web3Button
+                 <Web3Button // ID: thirdweb.ui.web3Button
                    contractAddress={MONSTER_CONTRACT_ADDRESS}
                    action={(contract) => contract.erc1155.claim(1, 1)}
                  >
@@ -656,32 +728,32 @@ Vamos testar nossa implementação completa:
 3. Teste o fluxo completo:
    - Insira uma senha e clique em "Login"
    - Para novos usuários:
-     - Uma carteira local e um smart wallet serão criados
+     - Uma carteira local (ID: `thirdweb.wallet.local`) e um smart wallet (ID: `thirdweb.wallet.smart`) serão criados
      - Um NFT inicial e tokens serão enviados automaticamente
    - O perfil do usuário será exibido com seus ativos
    - Você poderá "comprar" mais NFTs usando os tokens
 
-4. Observe como todas as transações são realizadas sem gás para o usuário, proporcionando uma excelente experiência de usuário.
+4. Observe como todas as transações são realizadas sem gás para o usuário através do paymaster (ID: `thirdweb.paymaster`), proporcionando uma excelente experiência de usuário.
 
 ## Conectando os Conceitos
 
 Vamos revisar os principais conceitos e como eles se conectam:
 
-1. **Contrato Account Factory**: Implantado uma vez pelo desenvolvedor, este contrato cria smart wallets para cada usuário.
+1. **Contrato Account Factory** (ID: `thirdweb.contracts.AccountFactory`): Implantado uma vez pelo desenvolvedor, este contrato cria smart wallets para cada usuário.
 
 2. **EOA vs. Smart Wallet**:
-   - **EOA (Externally Owned Account)**: Carteiras tradicionais controladas por chaves privadas
-   - **Smart Wallet**: Contratos inteligentes que funcionam como carteiras avançadas
+   - **EOA (Externally Owned Account)** (ID: `thirdweb.wallet.personal`): Carteiras tradicionais controladas por chaves privadas
+   - **Smart Wallet** (ID: `thirdweb.wallet.smart`): Contratos inteligentes que funcionam como carteiras avançadas
    - Relação: Um EOA é o **proprietário** de um Smart Wallet
 
 3. **Fluxo de Implementação Simples vs. Personalizada**:
-   - **Simples**: Usa componentes prontos da Thirdweb, rápida implementação
-   - **Personalizada**: Usa o SDK diretamente, mais controle e personalização
+   - **Simples**: Usa componentes prontos da Thirdweb (ID: `thirdweb.ui.connectWallet`), rápida implementação
+   - **Personalizada**: Usa o SDK diretamente (ID: `thirdweb.sdk.typescript`), mais controle e personalização
    - Ambas usam os mesmos conceitos fundamentais, mas com diferentes níveis de abstração
 
 4. **Transações sem Gás**:
-   - Funcionam através de um "paymaster" que paga o gás em nome do usuário
-   - Precisam de uma chave de API com permissões adequadas
+   - Funcionam através de um "paymaster" (ID: `thirdweb.paymaster`) que paga o gás em nome do usuário
+   - Precisam de uma chave de API (ID: `thirdweb.api.clientID`) com permissões adequadas
    - Melhoram drasticamente a experiência do usuário
 
 ## Conclusão
