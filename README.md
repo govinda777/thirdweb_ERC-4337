@@ -1,23 +1,49 @@
 > [!Important]  
-> This repository is referencing the `mumbai` chain.
+> Este repositório fazia referência originalmente à rede testnet `mumbai`.
 > 
-> `Mumbai` [is deprecated since 08/04/2024](https://blog.thirdweb.com/deprecation-of-mumbai-testnet/), meaning the code in this repository will no longer work out of the box.
+> A rede `Mumbai` [foi descontinuada desde 08/04/2024](https://blog.thirdweb.com/deprecation-of-mumbai-testnet/), portanto o código neste repositório precisará ser adaptado para funcionar.
 >
-> You can still use this repository, however you will have to switch any references to `mumbai` to another chain.
+> Para utilizar este projeto, você precisará substituir todas as referências à rede `mumbai` para `sepolia`, que é a rede testnet recomendada atualmente para Ethereum.
 
-## Account Abstraction ERC4337 Smart Wallet YouTube Tutorial
+## Account Abstraction ERC4337 Smart Wallet Tutorial
 
 [Account Abstraction ERC4337 - Build your own smart wallets quick and simple](https://youtu.be/xmz7c7rl9cM)
 
-Learn how to implement ERC4337 smart wallets to your app. Do this quick and easy with ConnectWallet UI component or learn how to build your own login flow and take advantage of the features offered with smart wallets.
+Aprenda como implementar carteiras inteligentes ERC4337 em seu aplicativo. Faça isso rápido e fácil com o componente ConnectWallet UI ou aprenda a criar seu próprio fluxo de login e aproveite os recursos oferecidos pelas carteiras inteligentes.
+
+## Migrando de Mumbai para Sepolia
+
+Para migrar este projeto de Mumbai para Sepolia, siga estas etapas:
+
+1. Substitua todas as importações de Mumbai para Sepolia em seus arquivos:
+   ```typescript
+   // Antes
+   import { Mumbai } from '@thirdweb-dev/chains';
+   
+   // Depois
+   import { Sepolia } from '@thirdweb-dev/chains';
+   ```
+
+2. Atualize todas as referências à rede nas configurações do ThirdwebProvider:
+   ```typescript
+   // Antes
+   <ThirdwebProvider activeChain={Mumbai} clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}>
+   
+   // Depois
+   <ThirdwebProvider activeChain={Sepolia} clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}>
+   ```
+
+3. Reimplante os contratos Account Factory na rede Sepolia através do dashboard da Thirdweb.
+
+4. Atualize as chaves de API para incluir permissões para a rede Sepolia.
 
 ## Environment Variables
 
-To run this project, you will need to add environment variables. Check the `.env.example` file for all the environment variables required and add it to `.env.local` file or set them up on your hosting provider.
+Para executar este projeto, você precisará adicionar variáveis de ambiente. Verifique o arquivo `.env.example` para todas as variáveis de ambiente necessárias e adicione-as ao arquivo `.env.local` ou configure-as em seu provedor de hospedagem.
 
 ## Deploy to IPFS
 
-Deploy a copy of your application to IPFS using the following command:
+Implante uma cópia do seu aplicativo no IPFS usando o seguinte comando:
 
 ```bash
 yarn deploy
@@ -25,16 +51,16 @@ yarn deploy
 
 ## Learn More
 
-To learn more about thirdweb and Next.js, take a look at the following resources:
+Para saber mais sobre thirdweb e Next.js, consulte os seguintes recursos:
 
-- [thirdweb React Documentation](https://docs.thirdweb.com/react) - learn about our React SDK.
-- [thirdweb TypeScript Documentation](https://docs.thirdweb.com/typescript) - learn about our JavaScript/TypeScript SDK.
-- [thirdweb Portal](https://docs.thirdweb.com) - check our guides and development resources.
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [thirdweb React Documentation](https://docs.thirdweb.com/react) - aprenda sobre nosso SDK React.
+- [thirdweb TypeScript Documentation](https://docs.thirdweb.com/typescript) - aprenda sobre nosso SDK JavaScript/TypeScript.
+- [thirdweb Portal](https://docs.thirdweb.com) - consulte nossos guias e recursos de desenvolvimento.
+- [Next.js Documentation](https://nextjs.org/docs) - aprenda sobre recursos e API do Next.js.
 - [Templates](https://thirdweb.com/templates)
 
-You can check out [the thirdweb GitHub organization](https://github.com/thirdweb-dev) - your feedback and contributions are welcome!
+Você pode conferir [a organização GitHub do thirdweb](https://github.com/thirdweb-dev) - seu feedback e contribuições são bem-vindos!
 
 ## Join our Discord!
 
-For any questions, suggestions, join our discord at [https://discord.gg/thirdweb](https://discord.gg/thirdweb).
+Para quaisquer perguntas ou sugestões, junte-se ao nosso discord em [https://discord.gg/thirdweb](https://discord.gg/thirdweb).
