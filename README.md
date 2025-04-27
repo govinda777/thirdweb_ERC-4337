@@ -1,3 +1,6 @@
+npm uninstall ethers --repository=https://npm.pkg.github.com/
+npm install ethers@5.7.2 --repository=https://npm.pkg.github.com/
+
 npm install @thirdweb-dev/react@latest @thirdweb-dev/sdk@latest --repository=https://npm.pkg.github.com/
 
 > [!Important]  

@@ -12,6 +12,8 @@ if (isNaN(chainId)) {
     throw new Error("Invalid environment variable: CHAIN_ID must be a number.");
 }
 
+const RPC_URL = process.env.RPC_URL || "https://rpc-amoy.polygon.technology/";
+
 // Define the Amoy testnet manually
 const amoy = {
   id: chainId,
@@ -26,13 +28,13 @@ const amoy = {
   // NOTE: If you encounter RPC errors (like 'cannot read properties of undefined (reading 'error')'), 
   // try using a different public Amoy RPC endpoint. 
   // You can find alternatives on public RPC lists (e.g., Chainlist).
-  rpc: ["https://rpc-amoy.polygon.technology/"],
+  rpc: [RPC_URL],
   rpcUrls: {
     default: {
-      http: ["https://rpc-amoy.polygon.technology/"], // Official RPC
+      http: [RPC_URL],
     },
     public: {
-        http: ["https://rpc-amoy.polygon.technology/"],
+        http: [RPC_URL],
     }
   },
   blockExplorers: {
