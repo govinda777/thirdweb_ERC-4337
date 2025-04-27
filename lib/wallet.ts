@@ -1,13 +1,13 @@
 import { ThirdwebSDK, isContractDeployed } from "@thirdweb-dev/sdk";
 import { SmartWallet, LocalWallet } from "@thirdweb-dev/wallets";
-import { MONSTER_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS } from "../const/addresses";
+import { MONSTER_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS, ACCOUNT_FACTORY_ADDRESS } from "../const/addresses";
 
 export function createSmartWallet(): SmartWallet {
     const smartWallet = new SmartWallet({
-        chain: "<chain_id>",
-        factoryAddress: "0x7326134435f0032eEe8E113Caa5Fc71595f9f4C8",
+        chain: `${process.env.CHAIN_NAME}`,
+        factoryAddress: `${process.env.CONTRACTS_ACCOUNT_FACTORY}`,
         gasless: true,
-        clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID,
+        clientId: process.env.THIRDWEB_CLIENT_ID,
     });
     return smartWallet;
 };
@@ -29,9 +29,9 @@ export async function connectSmartWallet(
 
     const sdk = await ThirdwebSDK.fromWallet(
         smartWallet,
-        "<chain_id>",
+        `${process.env.CHAIN_ID}`,
         {
-            clientId: process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID,
+            clientId: process.env.THIRDWEB_CLIENT_ID,
         }
     );
 
@@ -43,8 +43,8 @@ export async function connectSmartWallet(
 
     if (!isDeployed) {
         statusCallback("New account detected...");
-        const monsterContract = await sdk.getContract(MONSTER_CONTRACT_ADDRESS);
-        const tokenContract = await sdk.getContract(TOKEN_CONTRACT_ADDRESS);
+        const monsterContract = await sdk.getContract(process.env.MONSTER_CONTRACT_ADDRESS || "");
+        const tokenContract = await sdk.getContract(process.env.TOKEN_CONTRACT_ADDRESS || "");
 
         statusCallback("Creating new account...");
         const tx1 = await monsterContract.erc1155.claim.prepare(0, 1);

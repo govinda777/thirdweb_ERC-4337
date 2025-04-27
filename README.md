@@ -1,3 +1,5 @@
+npm install @thirdweb-dev/react@latest @thirdweb-dev/sdk@latest --repository=https://npm.pkg.github.com/
+
 > [!Important]  
 > Este repositório fazia referência originalmente à rede testnet `mumbai`.
 > 
@@ -27,10 +29,10 @@ Para migrar este projeto de Mumbai para Sepolia, siga estas etapas:
 2. Atualize todas as referências à rede nas configurações do ThirdwebProvider:
    ```typescript
    // Antes
-   <ThirdwebProvider activeChain={Mumbai} clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}>
+   <ThirdwebProvider activeChain={Mumbai} clientId={process.env.THIRDWEB_CLIENT_ID}>
    
    // Depois
-   <ThirdwebProvider activeChain={Sepolia} clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}>
+   <ThirdwebProvider activeChain={Sepolia} clientId={process.env.THIRDWEB_CLIENT_ID}>
    ```
 
 3. Reimplante os contratos Account Factory na rede Sepolia através do dashboard da Thirdweb.

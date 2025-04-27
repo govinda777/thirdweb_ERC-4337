@@ -18,7 +18,14 @@ export const Login = () => {
             setSigner(s);
             setIsLoading(false);
         } catch (error) {
-            console.error(error);
+            console.error("Error connecting smart wallet:", error);
+            if (error instanceof Error) {
+                console.error("Error name:", error.name);
+                console.error("Error message:", error.message);
+                console.error("Error stack:", error.stack);
+            }
+            setIsLoading(false);
+            setLoadingStatus("Failed to connect. Check console for details.");
         }
     };
     

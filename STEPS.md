@@ -194,7 +194,7 @@ Este é um passo crítico onde configuramos nosso aplicativo para usar carteiras
    Primeiro, crie um arquivo `.env.local` na raiz do projeto:
 
    ```
-   NEXT_PUBLIC_TEMPLATE_CLIENT_ID=SEU_CLIENT_ID
+   THIRDWEB_CLIENT_ID=SEU_CLIENT_ID
    ```
 
    Em seguida, edite o `_app.tsx`:
@@ -208,7 +208,7 @@ Este é um passo crítico onde configuramos nosso aplicativo para usar carteiras
      return (
        <ThirdwebProvider
          activeChain={Sepolia}
-         clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
+         clientId={process.env.THIRDWEB_CLIENT_ID}
          supportedWallets={[
            smartWallet({ 
              factoryAddress: 'SEU_ENDEREÇO_DA_FACTORY', 
@@ -339,7 +339,7 @@ Primeiro, configuramos o ThirdwebProvider básico. Posteriormente, usaremos uma 
      return (
        <ThirdwebProvider 
          activeChain={Sepolia} 
-         clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
+         clientId={process.env.THIRDWEB_CLIENT_ID}
        >
          <Component {...pageProps} />
        </ThirdwebProvider>
@@ -392,7 +392,7 @@ Agora, vamos criar um componente de login personalizado que usará uma senha par
          const result = await connectSmartWallet(
            password,
            setLoadingStatus,
-           process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID || ''
+           process.env.THIRDWEB_CLIENT_ID || ''
          );
          setSigner(result);
        } catch (error) {
@@ -557,7 +557,7 @@ Este componente gerenciará a experiência do usuário após o login.
        <ThirdwebProvider 
          signer={signer} 
          activeChain={Sepolia} 
-         clientId={process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID}
+         clientId={process.env.THIRDWEB_CLIENT_ID}
        >
          <div className="app-container">
            <NavBar />
