@@ -3,6 +3,18 @@ npm install ethers@5.7.2 --repository=https://npm.pkg.github.com/
 
 npm install @thirdweb-dev/react@latest @thirdweb-dev/sdk@latest --repository=https://npm.pkg.github.com/
 
+
+```
+curl -X POST https://rpc-amoy.polygon.technology/ \
+>   -H "Content-Type: application/json" \
+>   --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+{"jsonrpc":"2.0","id":1,"result":"0x14041d5"}
+```
+
+## Faucet
+
+https://www.alchemy.com/faucets/polygon-amoy
+
 > [!Important]  
 > Este repositório fazia referência originalmente à rede testnet `mumbai`.
 > 
@@ -32,10 +44,10 @@ Para migrar este projeto de Mumbai para Sepolia, siga estas etapas:
 2. Atualize todas as referências à rede nas configurações do ThirdwebProvider:
    ```typescript
    // Antes
-   <ThirdwebProvider activeChain={Mumbai} clientId={process.env.THIRDWEB_CLIENT_ID}>
+   <ThirdwebProvider activeChain={Mumbai} clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}>
    
    // Depois
-   <ThirdwebProvider activeChain={Sepolia} clientId={process.env.THIRDWEB_CLIENT_ID}>
+   <ThirdwebProvider activeChain={Sepolia} clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}>
    ```
 
 3. Reimplante os contratos Account Factory na rede Sepolia através do dashboard da Thirdweb.

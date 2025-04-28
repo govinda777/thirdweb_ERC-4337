@@ -1,60 +1,120 @@
 import { ThirdwebSDK, isContractDeployed } from "@thirdweb-dev/sdk";
 import { SmartWallet, LocalWallet } from "@thirdweb-dev/wallets";
+import { PolygonAmoyTestnet } from "../const/nets";
 import { MONSTER_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS, ACCOUNT_FACTORY_ADDRESS } from "../const/addresses";
 
+// Validação de ambiente
+if (!process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID) {
+    throw new Error("Missing THIRDWEB_CLIENT_ID environment variable");
+}
+
+if (!ACCOUNT_FACTORY_ADDRESS) {
+    throw new Error("Invalid factory address configuration");
+}
+
 export function createSmartWallet(): SmartWallet {
-    const smartWallet = new SmartWallet({
-        chain: `${process.env.CHAIN_NAME}`,
-        factoryAddress: `${process.env.CONTRACTS_ACCOUNT_FACTORY}`,
+    console.log("[DEBUG] Creating SmartWallet with config:", {
+        chain: PolygonAmoyTestnet.name,
+        factoryAddress: ACCOUNT_FACTORY_ADDRESS,
         gasless: true,
-        clientId: process.env.THIRDWEB_CLIENT_ID,
+        clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
     });
-    return smartWallet;
-};
+    
+    return new SmartWallet({
+        chain: PolygonAmoyTestnet,
+        factoryAddress: ACCOUNT_FACTORY_ADDRESS,
+        gasless: true,
+        clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+    });
+}
 
 export async function connectSmartWallet(
     password: string,
     statusCallback: (status: string) => void
 ): Promise<SmartWallet> {
-    statusCallback("Searching for trainer account...");
-    const smartWallet = createSmartWallet();
-    const personalWallet = new LocalWallet();
-    await personalWallet.loadOrCreate({
-        strategy: "encryptedJson",
-        password: password,
-    });
-    await smartWallet.connect({
-        personalWallet
-    });
+    try {
+        statusCallback("Searching for trainer account...");
+        const smartWallet = createSmartWallet();
+        const personalWallet = new LocalWallet();
 
-    const sdk = await ThirdwebSDK.fromWallet(
-        smartWallet,
-        `${process.env.CHAIN_ID}`,
-        {
-            clientId: process.env.THIRDWEB_CLIENT_ID,
+        if (!password) {
+            throw new Error("A senha não pode ser vazia.");
         }
-    );
 
-    const address = await sdk.wallet.getAddress();
-    const isDeployed = await isContractDeployed(
-        address,
-        sdk.getProvider(),
-    );
+        // 1. Initialize personal wallet
+        console.log("[DEBUG] Loading or creating personal wallet...");
+        await personalWallet.loadOrCreate({
+            strategy: "encryptedJson",
+            password: password,
+        });
 
-    if (!isDeployed) {
-        statusCallback("New account detected...");
-        const monsterContract = await sdk.getContract(process.env.MONSTER_CONTRACT_ADDRESS || "");
-        const tokenContract = await sdk.getContract(process.env.TOKEN_CONTRACT_ADDRESS || "");
+        const address = await personalWallet.getAddress();
+        if (!address) {
+            throw new Error("Falha ao criar ou carregar carteira local.");
+        }
+        console.log("[DEBUG] personalWallet address:", address);
 
-        statusCallback("Creating new account...");
-        const tx1 = await monsterContract.erc1155.claim.prepare(0, 1);
-        const tx2 = await tokenContract.erc20.claim.prepare(10);
-        const transactions = [tx1, tx2];
+        // 2. Connect with explicit chain ID
+        console.log("[DEBUG] Connecting smart wallet...");
+        await smartWallet.connect({
+            personalWallet,
+            chainId: PolygonAmoyTestnet.chainId
+        });
+        console.log("[DEBUG] Smart wallet connected successfully");
 
-        statusCallback("Sending starter monster and initial funds...");
-        const batchTx = await smartWallet.executeBatch(transactions);
-    } else {
-        statusCallback("Trainer account found! Loading monsters...");
+        // 3. Validate connection
+        const walletAddress = await smartWallet.getAddress();
+        if (!walletAddress) {
+            throw new Error("Connection failed");
+        }
+
+        const sdk = await ThirdwebSDK.fromWallet(
+            smartWallet,
+            PolygonAmoyTestnet,
+            {
+                clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+            }
+        );
+
+        // 4. Check factory deployment
+        const isFactoryDeployed = await isContractDeployed(
+            ACCOUNT_FACTORY_ADDRESS,
+            sdk.getProvider()
+        );
+
+        if (!isFactoryDeployed) {
+            throw new Error("Factory contract not deployed on this network");
+        }
+
+        const isDeployed = await isContractDeployed(
+            walletAddress,
+            sdk.getProvider()
+        );
+
+        if (!isDeployed) {
+            statusCallback("New account detected...");
+            const monsterContract = await sdk.getContract(MONSTER_CONTRACT_ADDRESS);
+            const tokenContract = await sdk.getContract(TOKEN_CONTRACT_ADDRESS);
+
+            statusCallback("Creating new account...");
+            const tx1 = await monsterContract.erc1155.claim.prepare(0, 1);
+            const tx2 = await tokenContract.erc20.claim.prepare(10);
+            const transactions = [tx1, tx2];
+
+            statusCallback("Sending starter monster and initial funds...");
+            const batchTx = await smartWallet.executeBatch(transactions);
+        } else {
+            statusCallback("Trainer account found! Loading monsters...");
+        }
+
+        return smartWallet;
+    } catch (error: any) {
+        console.error("[DEBUG] Error details:", {
+            error,
+            chainId: PolygonAmoyTestnet.chainId,
+            factoryAddress: ACCOUNT_FACTORY_ADDRESS,
+            clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID?.slice(0,5)
+        });
+        throw error;
     }
-    return smartWallet;
-};
+}

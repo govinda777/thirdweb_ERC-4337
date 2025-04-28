@@ -11,8 +11,8 @@ export const Connected = ({
     return (
         <ThirdwebSDKProvider
             signer={signer}
-            activeChain={"<chain_id>"}
-            clientId={process.env.THIRDWEB_CLIENT_ID}
+            activeChain={"<NEXT_PUBLIC_THIRDWEB_CLIENT_ID>"}
+            clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
         >
             <ConnectedComponents />
         </ThirdwebSDKProvider>
