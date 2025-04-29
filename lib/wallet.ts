@@ -1,6 +1,6 @@
 import { ThirdwebSDK, isContractDeployed } from "@thirdweb-dev/sdk";
 import { SmartWallet, LocalWallet } from "@thirdweb-dev/wallets";
-import { PolygonAmoyTestnet } from "../const/nets";
+import { PolygonZkevmTestnet } from "@thirdweb-dev/chains";
 import { MONSTER_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS, ACCOUNT_FACTORY_ADDRESS } from "../const/addresses";
 
 // Validação de ambiente
@@ -14,14 +14,14 @@ if (!ACCOUNT_FACTORY_ADDRESS) {
 
 export function createSmartWallet(): SmartWallet {
     console.log("[DEBUG] Creating SmartWallet with config:", {
-        chain: PolygonAmoyTestnet.name,
+        chain: PolygonZkevmTestnet.name,
         factoryAddress: ACCOUNT_FACTORY_ADDRESS,
         gasless: true,
         clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
     });
     
     return new SmartWallet({
-        chain: PolygonAmoyTestnet,
+        chain: PolygonZkevmTestnet,
         factoryAddress: ACCOUNT_FACTORY_ADDRESS,
         gasless: true,
         clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
@@ -58,7 +58,7 @@ export async function connectSmartWallet(
         console.log("[DEBUG] Connecting smart wallet...");
         await smartWallet.connect({
             personalWallet,
-            chainId: PolygonAmoyTestnet.chainId
+            chainId: PolygonZkevmTestnet.chainId
         });
         console.log("[DEBUG] Smart wallet connected successfully");
 
@@ -70,7 +70,7 @@ export async function connectSmartWallet(
 
         const sdk = await ThirdwebSDK.fromWallet(
             smartWallet,
-            PolygonAmoyTestnet,
+            PolygonZkevmTestnet,
             {
                 clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
             }
@@ -111,7 +111,7 @@ export async function connectSmartWallet(
     } catch (error: any) {
         console.error("[DEBUG] Error details:", {
             error,
-            chainId: PolygonAmoyTestnet.chainId,
+            chainId: PolygonZkevmTestnet.chainId,
             factoryAddress: ACCOUNT_FACTORY_ADDRESS,
             clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID?.slice(0,5)
         });

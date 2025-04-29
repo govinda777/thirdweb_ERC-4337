@@ -4,7 +4,7 @@ import "../styles/globals.css";
 import { logger } from "../utils/logger";
 import ErrorBoundary from "../src/components/ErrorBoundary";
 import React from "react";
-import { PolygonAmoyTestnet } from "../const/nets";
+import { PolygonZkevmTestnet } from "@thirdweb-dev/chains";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [isClient, setIsClient] = React.useState(false);
@@ -19,8 +19,18 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ThirdwebProvider
-      activeChain={PolygonAmoyTestnet}
+      activeChain={PolygonZkevmTestnet}
       clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
+      sdkOptions={{
+        gasless: {
+          openzeppelin: {
+            relayerUrl: "https://api.defender.openzeppelin.com/actions/3d5fa97d-979d-437a-99cf-66fdc41884fc/runs/webhook/34a788c2-cb58-442b-8ff1-1c59e35af9be/UAtnNXoRE43pRFQJrsV7HE",
+          },
+        },
+        bundlerUrl: "https://eth-sepolia.g.alchemy.com/v2/your-api-key",
+        chainId: 1442,
+        bundlerChainId: 1442,
+      }}
     >
       <ErrorBoundary>
         <Component {...pageProps} />
