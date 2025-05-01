@@ -1,4 +1,4 @@
-import { ThirdwebSDK, isContractDeployed } from "@thirdweb-dev/sdk";
+import { ThirdwebSDK, isContractDeployed, Transaction, TransactionResultWithId } from "@thirdweb-dev/sdk";
 import { SmartWallet, LocalWallet } from "@thirdweb-dev/wallets";
 import { PolygonZkevmTestnet } from "@thirdweb-dev/chains";
 import { MONSTER_CONTRACT_ADDRESS, TOKEN_CONTRACT_ADDRESS, ACCOUNT_FACTORY_ADDRESS } from "../const/addresses";
@@ -15,9 +15,11 @@ if (!ACCOUNT_FACTORY_ADDRESS) {
 export function createSmartWallet(): SmartWallet {
     console.log("[DEBUG] Creating SmartWallet with config:", {
         chain: PolygonZkevmTestnet.name,
+        chainId: PolygonZkevmTestnet.chainId,
         factoryAddress: ACCOUNT_FACTORY_ADDRESS,
         gasless: true,
         clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID,
+        rpcUrls: PolygonZkevmTestnet.rpc,
     });
     
     return new SmartWallet({
@@ -55,7 +57,7 @@ export async function connectSmartWallet(
         console.log("[DEBUG] personalWallet address:", address);
 
         // 2. Connect with explicit chain ID
-        console.log("[DEBUG] Connecting smart wallet...");
+        console.log("[DEBUG] Connecting smart wallet with chainId:", PolygonZkevmTestnet.chainId);
         await smartWallet.connect({
             personalWallet,
             chainId: PolygonZkevmTestnet.chainId
@@ -67,6 +69,7 @@ export async function connectSmartWallet(
         if (!walletAddress) {
             throw new Error("Connection failed");
         }
+        console.log("[DEBUG] Smart wallet address:", walletAddress);
 
         const sdk = await ThirdwebSDK.fromWallet(
             smartWallet,
@@ -77,6 +80,7 @@ export async function connectSmartWallet(
         );
 
         // 4. Check factory deployment
+        console.log("[DEBUG] Checking factory deployment at:", ACCOUNT_FACTORY_ADDRESS);
         const isFactoryDeployed = await isContractDeployed(
             ACCOUNT_FACTORY_ADDRESS,
             sdk.getProvider()
@@ -99,7 +103,7 @@ export async function connectSmartWallet(
             statusCallback("Creating new account...");
             const tx1 = await monsterContract.erc1155.claim.prepare(0, 1);
             const tx2 = await tokenContract.erc20.claim.prepare(10);
-            const transactions = [tx1, tx2];
+            const transactions = [tx1, tx2] as any[];
 
             statusCallback("Sending starter monster and initial funds...");
             const batchTx = await smartWallet.executeBatch(transactions);
@@ -112,8 +116,12 @@ export async function connectSmartWallet(
         console.error("[DEBUG] Error details:", {
             error,
             chainId: PolygonZkevmTestnet.chainId,
+            chainName: PolygonZkevmTestnet.name,
             factoryAddress: ACCOUNT_FACTORY_ADDRESS,
-            clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID?.slice(0,5)
+            clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID?.slice(0,5),
+            rpcUrls: PolygonZkevmTestnet.rpc,
+            errorMessage: error.message,
+            errorStack: error.stack
         });
         throw error;
     }

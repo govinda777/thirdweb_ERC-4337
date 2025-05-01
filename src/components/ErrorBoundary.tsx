@@ -23,7 +23,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log the error using your custom logger
-    logger.error("❌ Uncaught runtime error:", error, errorInfo);
+    logger.error("❌ Uncaught runtime error:", error);
   }
 
   public render() {

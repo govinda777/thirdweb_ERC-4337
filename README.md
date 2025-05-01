@@ -1,8 +1,86 @@
+# ERC-4337 Smart Wallet Project
+
+This project demonstrates the implementation of ERC-4337 smart wallets using thirdweb's tools and components.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js
+- npm or yarn
+- A thirdweb account and API key
+
+### Installation
+
+```bash
+# Install dependencies
+npm install --repository=https://npm.pkg.github.com/ --prefer-offline --progress=false --verbose
+
+# Install specific ethers version
 npm uninstall ethers --repository=https://npm.pkg.github.com/
 npm install ethers@5.7.2 --repository=https://npm.pkg.github.com/
 
-npm install @thirdweb-dev/react@latest @thirdweb-dev/sdk@latest --repository=https://npm.pkg.github.com/
+# Install thirdweb packages
+npm install @thirdweb-dev/react@latest @thirdweb-dev/chains@latest @thirdweb-dev/sdk@latest --repository=https://npm.pkg.github.com/
+```
 
+## ⚙️ Configuration
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory and add the following variables:
+```
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_client_id_here
+```
+
+### Network Configuration
+
+This project uses the Sepolia testnet. Make sure to:
+1. Update all imports from Mumbai to Sepolia:
+```typescript
+import { Sepolia } from '@thirdweb-dev/chains';
+```
+
+2. Configure the ThirdwebProvider:
+```typescript
+<ThirdwebProvider activeChain={Sepolia} clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}>
+```
+
+3. Deploy your Account Factory contracts to Sepolia through the thirdweb dashboard
+4. Update API keys to include Sepolia network permissions
+
+## 📚 Resources
+
+- [Account Abstraction ERC4337 Tutorial](https://youtu.be/xmz7c7rl9cM)
+- [thirdweb React Documentation](https://docs.thirdweb.com/react)
+- [thirdweb TypeScript Documentation](https://docs.thirdweb.com/typescript)
+- [thirdweb Portal](https://docs.thirdweb.com)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [thirdweb Templates](https://thirdweb.com/templates)
+
+## 🚀 Deployment
+
+### Deploy to IPFS
+
+```bash
+yarn deploy
+```
+
+## 💬 Community
+
+Join our Discord community for any questions or suggestions:
+[https://discord.gg/thirdweb](https://discord.gg/thirdweb)
+
+## 📝 Notes
+
+> [!Important]  
+> This repository was originally referencing the `mumbai` testnet.
+> 
+> The `Mumbai` network [has been deprecated since 04/08/2024](https://blog.thirdweb.com/deprecation-of-mumbai-testnet/), so the code in this repository has been adapted to work with Sepolia, which is the currently recommended testnet for Ethereum.
+
+## 🤝 Contributing
+
+Feel free to contribute to this project! Check out the [thirdweb GitHub organization](https://github.com/thirdweb-dev) for more information.
 
 ```
 curl -X POST https://rpc-amoy.polygon.technology/ \
